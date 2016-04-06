@@ -17,7 +17,30 @@ USER_LIST client_list;//成员列表
 void do_login(MESSAGE msg,int sock,struct sockaddr_in *cliaddr);
 void do_logout(MESSAGE msg,int sock,struct sockaddr_in *cliaddr);
 void do_sendlist(int sock,struct sockaddr_in *cliaddr);
+void do_send_msg_to_all(MESSAGE msg,int sock);
 
+/*
+ *
+ * 向所有用户发送消息
+ */
+void do_send_msg_to_all(MESSAGE msg,int sock)
+{
+	USER_LIST::iterator it;
+	CHAT_MSG *chatmsg=(CHAT_MSG *)msg.body;
+	for(it=client_list.begin();it!=client_list.end();++it)
+	{
+		if(strcmp(it->username,chatmsg->username)!=0)
+		{
+			struct sockaddr_in peeraddr;
+			memset(&peeraddr,0,sizeof(peeraddr));
+			peeraddr.sin_family=AF_INET;
+			peeraddr.sin_port=it->port;
+			peeraddr.sin_addr.s_addr=it->ip;
+			if(sendto(sock,&msg,sizeof(msg),0,(struct sockaddr *)&peeraddr,sizeof(peeraddr))<0)
+			  ERROR_EXIT("sendto");
+		}
+	}
+}
 
 
 
@@ -50,6 +73,9 @@ void chat_srv(int sock)
 				break;
 			case C2S_ONLINE_USER:
 				do_sendlist(sock,&cliaddr);
+				break;
+			case PUB_CHAT:
+				do_send_msg_to_all(msg,sock);
 				break;
 			default:
 				break;

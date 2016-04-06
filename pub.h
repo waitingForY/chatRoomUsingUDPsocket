@@ -21,6 +21,9 @@ using namespace std;
 //c2c
 #define C2C_CHAT 6
 
+//public chat
+#define PUB_CHAT 7
+
 typedef struct message
 {
 	int cmd;

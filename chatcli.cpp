@@ -24,7 +24,7 @@ void do_chat(MESSAGE &msg);
 
 void parse_cmd(char *cmdline,int sock,struct sockaddr_in *servaddr);
 bool sendmsgto(int sock,char *username,char *msg);
-
+bool send_msg_to_server(int sock,char *msg,struct sockaddr_in *servaddr);
 
 void showcmd()
 {
@@ -34,21 +34,27 @@ void showcmd()
 	cout<<"1、ls"<<endl;
 	cout<<"2、man"<<endl;
 	cout<<"3、exit"<<endl;
-	cout<<"4、send username msg"<<endl;
-	cout<<"5、clear"<<endl;
-	cout<<"6、chmod mode"<<endl;
+	//cout<<"4、send username msg"<<endl;
+	cout<<"4、clear"<<endl;
+	cout<<"5、chmod mode(mode:room/p2p)"<<endl;
 	cout<<"*********************"<<endl;
 	cout<<endl;
 }
 
 
 /*
- *聊天函数
+ *私聊函数
  */
 void do_chat(MESSAGE &msg)
 {
 	CHAT_MSG *chatmsg=(CHAT_MSG *)msg.body;
 	cout<<chatmsg->username<<" 对你说: ["<<chatmsg->msg<<"]"<<endl;
+}
+
+void do_pubchat(MESSAGE &msg)
+{
+	CHAT_MSG *chatmsg=(CHAT_MSG *)msg.body;
+	cout<<chatmsg->username<<" 说："<<" ["<<chatmsg->msg<<"]"<<endl;
 }
 
 /*
@@ -93,10 +99,16 @@ void parse_cmd(char *cmdline,int sock,struct sockaddr_in *servaddr)
 		strcpy(peername,p);
 		while(*(++p2)==' ');
 		strcpy(msg,p2);
-		bool sendsucc=sendmsgto(sock,peername,msg);
-		if(!sendsucc)
+		bool sendsucc;
+		if(strcmp(peername,"all")==0)
 		{
-			cout<<"send false!"<<endl;
+			if(!(sendsucc=send_msg_to_server(sock,msg,servaddr)))
+			  cout<<"send false!"<<endl;
+		}
+		else
+		{
+			if(!(sendsucc=sendmsgto(sock,peername,msg)))
+			  cout<<"send false!"<<endl;
 		}
 	}
 	else if(strcmp(cmd,"ls")==0)
@@ -138,7 +150,31 @@ void parse_cmd(char *cmdline,int sock,struct sockaddr_in *servaddr)
 		}
 		//*p2='\0';
 		strcpy(mode,p2);
-		cout<<mode<<endl;
+		if(strcmp(mode,"room")==0)
+		{
+			system("clear");
+			cout<<"现在你可以进行群聊了！"<<endl;
+			cout<<"******************"<<endl;
+			cout<<"send all msg"<<endl;
+			cout<<"******************"<<endl;
+
+		}
+		else if(strcmp(mode,"p2p")==0)
+		{
+			system("clear");
+			cout<<"现在你可以进行点对点通信了！"<<endl;
+			cout<<"******************"<<endl;
+			cout<<"send username msg"<<endl;
+			cout<<"******************"<<endl;
+		}
+		else
+		{
+			cout<<"命令错误，请从新输入："<<endl;
+			cout<<"******************"<<endl;
+			cout<<"chmod mode (mode:room/p2p)"<<endl;
+			cout<<"******************"<<endl;
+		}
+		//cout<<mode<<endl;
 		//cout<<"该功能还在实现中，请耐心等候！"<<endl;
 
 	}
@@ -193,6 +229,32 @@ void do_getlist(int sock)
 		cout<<i+1<<" "<<user.username<<"("<<inet_ntoa(tmp)<<":"<<ntohs(user.port)<<")"<<endl;
 	}
 }
+/*
+ *
+ *公聊函数，向服务器发送消息
+ */
+bool send_msg_to_server(int sock,char *msg,struct sockaddr_in *servaddr)
+{
+	MESSAGE message;
+	memset(&message,0,sizeof(message));
+	message.cmd=htonl(PUB_CHAT);
+	CHAT_MSG chatmsg;
+	strcpy(chatmsg.username,username);
+	strcpy(chatmsg.msg,msg);
+	memcpy(message.body,&chatmsg,sizeof(chatmsg));
+
+	if(sendto(sock,&message,sizeof(message),0,(struct sockaddr *)servaddr,sizeof(*servaddr))<0)
+	{
+		return false;
+		ERROR_EXIT("sendto");
+	}
+	return true;
+}
+
+/*
+ *
+ *私聊函数，可以进行p2p聊天
+ */
 
 bool sendmsgto(int sock,char *name,char *msg)
 {
@@ -232,7 +294,7 @@ bool sendmsgto(int sock,char *name,char *msg)
 	
 	in_addr tmp;
 	tmp.s_addr=it->ip;
-	cout<<"你对 "<<name<<" 说： ["<<msg<<"]"<<endl;
+	//cout<<"你对 "<<name<<" 说： ["<<msg<<"]"<<endl;
 	sendto(sock,(const char *)&m,sizeof(m),0,(struct sockaddr *)&peeraddr,sizeof(peeraddr));
 	return true;
 }
@@ -329,6 +391,9 @@ void chat_cli(int sock)
 					break;
 				case C2C_CHAT:
 					do_chat(msg);
+					break;
+				case PUB_CHAT:
+					do_pubchat(msg);
 					break;
 				default:
 					break;
