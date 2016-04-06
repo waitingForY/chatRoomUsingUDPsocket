@@ -25,12 +25,36 @@ void do_chat(MESSAGE &msg);
 void parse_cmd(char *cmdline,int sock,struct sockaddr_in *servaddr);
 bool sendmsgto(int sock,char *username,char *msg);
 
+
+void showcmd()
+{
+	cout<<endl;
+	cout<<"*********************"<<endl;
+	cout<<"命令如下:"<<endl;
+	cout<<"1、ls"<<endl;
+	cout<<"2、man"<<endl;
+	cout<<"3、exit"<<endl;
+	cout<<"4、send username msg"<<endl;
+	cout<<"5、clear"<<endl;
+	cout<<"6、mode"<<endl;
+	cout<<"*********************"<<endl;
+	cout<<endl;
+}
+
+
+
+
+
 void do_chat(MESSAGE &msg)
 {
 	CHAT_MSG *chatmsg=(CHAT_MSG *)msg.body;
 	cout<<chatmsg->username<<" 对你说: ["<<chatmsg->msg<<"]"<<endl;
 }
 
+/*
+ *命令解析函数
+ *
+ */
 void parse_cmd(char *cmdline,int sock,struct sockaddr_in *servaddr)
 {
 	char cmd[10]={0};
@@ -63,12 +87,7 @@ void parse_cmd(char *cmdline,int sock,struct sockaddr_in *servaddr)
 		if(p2==NULL)
 		{
 			cout<<"命令错误，请从新输入："<<endl;
-			cout<<"命令如下:"<<endl;
-			cout<<"send username msg"<<endl;
-			cout<<"list"<<endl;
-			cout<<"exit"<<endl;
-			cout<<endl;
-			return;
+			showcmd();
 		}
 		*p2='\0';
 		strcpy(peername,p);
@@ -80,7 +99,7 @@ void parse_cmd(char *cmdline,int sock,struct sockaddr_in *servaddr)
 			cout<<"send false!"<<endl;
 		}
 	}
-	else if(strcmp(cmd,"list")==0)
+	else if(strcmp(cmd,"ls")==0)
 	{
 		MESSAGE msg;
 		memset(&msg,0,sizeof(msg));
@@ -88,14 +107,32 @@ void parse_cmd(char *cmdline,int sock,struct sockaddr_in *servaddr)
 		if(sendto(sock,&msg,sizeof(msg),0,(struct sockaddr *)servaddr,sizeof(*servaddr))<0)
 		  ERROR_EXIT("sendto");	
 	}
+	else if(strcmp(cmd,"man")==0)
+	{
+		cout<<"有如下命令可以使用："<<endl;
+		showcmd();
+		cout<<"1、ls用于查看在线用户列表！"<<endl;
+		cout<<"2、man获取帮助文档！"<<endl;
+		cout<<"3、exit退出聊天！"<<endl;
+		cout<<"4、send username msg发送消息,username为用户列表中的用户的名字，msg就是你想说的话！"<<endl;
+		cout<<"5、clear清空聊天记录！"<<endl;
+		cout<<"6、mode选择聊天模式（提供公聊和私聊两种模式）！"<<endl;
+		
+	}
+	else if(strcmp(cmd,"clear")==0)
+	{
+		system("clear");
+		//cout<<"该功能还在实现中，请耐心等候！"<<endl;
+	}
+	else if(strcmp(cmd,"mode")==0)
+	{
+		cout<<"该功能还在实现中，请耐心等候！"<<endl;
+
+	}
 	else
 	{
 		cout<<"命令错误，请从新输入："<<endl;
-		cout<<"命令如下:"<<endl;
-		cout<<"send username msg"<<endl;
-		cout<<"list"<<endl;
-		cout<<"exit"<<endl;
-		cout<<endl;
+		showcmd();
 	}
 }
 
@@ -148,7 +185,9 @@ bool sendmsgto(int sock,char *name,char *msg)
 {
 	if(strcmp(name,username)==0)
 	{
+		cout<<endl;
 		cout<<"你不能对自己发消息！sb"<<endl;
+		cout<<endl;
 		return false;
 	}
 	USER_LIST::iterator it;
@@ -159,7 +198,9 @@ bool sendmsgto(int sock,char *name,char *msg)
 	}
 	if(it==client_list.end())
 	{
+		cout<<endl;
 		cout<<"没有 "<<name<<" 这个用户，请先看聊天室有哪些人！"<<endl;
+		cout<<endl;
 		return false;
 	}
 	MESSAGE m;
@@ -209,18 +250,26 @@ void chat_cli(int sock)
 		recvfrom(sock,&msg,sizeof(msg),0,NULL,NULL);
 		int cmd=ntohl(msg.cmd);
 		if(cmd==S2C_ALREADY_LOGINED)
-		  cout<<username<<" 这个用户名已存在，请重新输入！"<<endl;
+		{
+			cout<<endl;
+			cout<<username<<" 这个用户名已存在，请重新输入！"<<endl;
+			cout<<endl;
+		}
 		else if(cmd==S2C_LOGIN_OK)
 		{
+			cout<<endl;
 			cout<<"恭喜你已经成功登录聊天室！"<<endl;
 			cout<<"现在可以进行聊天了！"<<endl;
+			cout<<endl;
 			break;
 		}
 	}
 	int count;
 	recvfrom(sock,&count,sizeof(int),0,NULL,NULL);
 	int n=ntohl(count);
-	cout<<"目前共有 "<<n<<" 个人在该聊天室中！"<<endl;
+	cout<<endl;
+	cout<<"目前共有 "<<n<<" 个人在该聊天室中:"<<endl;
+	cout<<endl;
 	for(int i=0;i<n;i++)
 	{
 		USER_INFO user;
@@ -231,10 +280,7 @@ void chat_cli(int sock)
 		cout<<i+1<<" "<<user.username<<" ("<<inet_ntoa(tmp)<<":"<<ntohs(user.port)<<")"<<endl;
 	}
 	cout<<endl;
-	cout<<"命令如下:"<<endl;
-	cout<<"send username msg"<<endl;
-	cout<<"list"<<endl;
-	cout<<"exit"<<endl;
+	showcmd();
 	cout<<endl;
 
 
