@@ -36,15 +36,15 @@ void showcmd()
 	cout<<"3、exit"<<endl;
 	cout<<"4、send username msg"<<endl;
 	cout<<"5、clear"<<endl;
-	cout<<"6、mode"<<endl;
+	cout<<"6、chmod mode"<<endl;
 	cout<<"*********************"<<endl;
 	cout<<endl;
 }
 
 
-
-
-
+/*
+ *聊天函数
+ */
 void do_chat(MESSAGE &msg)
 {
 	CHAT_MSG *chatmsg=(CHAT_MSG *)msg.body;
@@ -81,7 +81,7 @@ void parse_cmd(char *cmdline,int sock,struct sockaddr_in *servaddr)
 		char msg[MSG_LEN]={0};
 		/* send user msg */
 		/*      p    p2  */
-		while(*p++==' ');
+		while(*(++p)==' ');
 		char *p2;
 		p2=strchr(p,' ');
 		if(p2==NULL)
@@ -91,7 +91,7 @@ void parse_cmd(char *cmdline,int sock,struct sockaddr_in *servaddr)
 		}
 		*p2='\0';
 		strcpy(peername,p);
-		while(*p2++==' ');
+		while(*(++p2)==' ');
 		strcpy(msg,p2);
 		bool sendsucc=sendmsgto(sock,peername,msg);
 		if(!sendsucc)
@@ -114,9 +114,9 @@ void parse_cmd(char *cmdline,int sock,struct sockaddr_in *servaddr)
 		cout<<"1、ls用于查看在线用户列表！"<<endl;
 		cout<<"2、man获取帮助文档！"<<endl;
 		cout<<"3、exit退出聊天！"<<endl;
-		cout<<"4、send username msg发送消息,username为用户列表中的用户的名字，msg就是你想说的话！"<<endl;
+		cout<<"4、send username msg发送消息,username为用户列表中的用户的名字，msg你想说的话！"<<endl;
 		cout<<"5、clear清空聊天记录！"<<endl;
-		cout<<"6、mode选择聊天模式（提供公聊和私聊两种模式）！"<<endl;
+		cout<<"6、chmod mode选择聊天模式,mode为聊天模式（提供公聊room和私聊两种模式p2p）！"<<endl;
 		
 	}
 	else if(strcmp(cmd,"clear")==0)
@@ -124,9 +124,22 @@ void parse_cmd(char *cmdline,int sock,struct sockaddr_in *servaddr)
 		system("clear");
 		//cout<<"该功能还在实现中，请耐心等候！"<<endl;
 	}
-	else if(strcmp(cmd,"mode")==0)
+	else if(strcmp(cmd,"chmod")==0)
 	{
-		cout<<"该功能还在实现中，请耐心等候！"<<endl;
+		char mode[16]={0};
+		while(*(++p)==' ');
+		char *p2;
+		p2=p;
+		//p2=strchr(p,' ');
+		if(p2==NULL)
+		{
+			cout<<"命令错误，请从新输入："<<endl;
+			showcmd();
+		}
+		//*p2='\0';
+		strcpy(mode,p2);
+		cout<<mode<<endl;
+		//cout<<"该功能还在实现中，请耐心等候！"<<endl;
 
 	}
 	else
