@@ -25,7 +25,13 @@ void do_chat(MESSAGE &msg);
 void parse_cmd(char *cmdline,int sock,struct sockaddr_in *servaddr);
 bool sendmsgto(int sock,char *username,char *msg);
 bool send_msg_to_server(int sock,char *msg,struct sockaddr_in *servaddr);
+void showcmd();
+void show_help_info();
 
+/*
+ *
+ *显示命令列表
+ */
 void showcmd()
 {
 	cout<<endl;
