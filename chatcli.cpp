@@ -29,19 +29,35 @@ bool send_msg_to_server(int sock,char *msg,struct sockaddr_in *servaddr);
 void showcmd()
 {
 	cout<<endl;
-	cout<<"*********************"<<endl;
+	cout<<"*****************************"<<endl;
 	cout<<"命令如下:"<<endl;
 	cout<<"1、ls"<<endl;
 	cout<<"2、man"<<endl;
 	cout<<"3、exit"<<endl;
-	//cout<<"4、send username msg"<<endl;
-	cout<<"4、clear"<<endl;
-	cout<<"5、chmod mode(mode:room/p2p)"<<endl;
-	cout<<"*********************"<<endl;
+	cout<<"4、list"<<endl;
+	cout<<"5、clear"<<endl;
+	cout<<"6、showinfo"<<endl;
+	cout<<"7、chmod mode(mode:room/p2p)"<<endl;
+	cout<<"*****************************"<<endl;
 	cout<<endl;
 }
 
+/*
+ *显示帮助信息
+ */
+void show_help_info()
+{
+	cout<<"1、ls展示功能命令！"<<endl;
+	cout<<"2、man获取帮助文档！"<<endl;
+	cout<<"3、exit退出聊天！"<<endl;
+	cout<<"4、list查看用户列表！"<<endl;
+	cout<<"5、clear清空聊天记录！"<<endl;
+	cout<<"6、showinfo查看个人信息！"<<endl;
+	cout<<"7、send username msg 向username发送msg，username必须存在（不能是自己）"<<endl;
+	cout<<"8、send all msg 向所有人发送msg（all为关键字，用户名不能为all）"<<endl;
+	cout<<"9、chmod mode选择聊天模式,mode为聊天模式（提供公聊room和私聊两种模式p2p）！"<<endl;
 
+}
 /*
  *私聊函数
  */
@@ -111,7 +127,7 @@ void parse_cmd(char *cmdline,int sock,struct sockaddr_in *servaddr)
 			  cout<<"send false!"<<endl;
 		}
 	}
-	else if(strcmp(cmd,"ls")==0)
+	else if(strcmp(cmd,"list")==0)
 	{
 		MESSAGE msg;
 		memset(&msg,0,sizeof(msg));
@@ -119,17 +135,21 @@ void parse_cmd(char *cmdline,int sock,struct sockaddr_in *servaddr)
 		if(sendto(sock,&msg,sizeof(msg),0,(struct sockaddr *)servaddr,sizeof(*servaddr))<0)
 		  ERROR_EXIT("sendto");	
 	}
+	else if(strcmp(cmd,"showinfo")==0)
+	{
+		for(USER_LIST::iterator it=client_list.begin();it!=client_list.end();++it)
+		  if(strcmp(it->username,username)==0)
+		  {
+			  in_addr tmp;
+			  tmp.s_addr=it->ip;
+			  cout<<it->username<<" ("<<inet_ntoa(tmp)<<":"<<ntohs(it->port)<<")"<<endl;
+
+		  }
+	}
 	else if(strcmp(cmd,"man")==0)
 	{
 		cout<<"有如下命令可以使用："<<endl;
-		showcmd();
-		cout<<"1、ls用于查看在线用户列表！"<<endl;
-		cout<<"2、man获取帮助文档！"<<endl;
-		cout<<"3、exit退出聊天！"<<endl;
-		cout<<"4、send username msg发送消息,username为用户列表中的用户的名字，msg你想说的话！"<<endl;
-		cout<<"5、clear清空聊天记录！"<<endl;
-		cout<<"6、chmod mode选择聊天模式,mode为聊天模式（提供公聊room和私聊两种模式p2p）！"<<endl;
-		
+		show_help_info();
 	}
 	else if(strcmp(cmd,"clear")==0)
 	{
@@ -167,16 +187,21 @@ void parse_cmd(char *cmdline,int sock,struct sockaddr_in *servaddr)
 			cout<<"send username msg"<<endl;
 			cout<<"******************"<<endl;
 		}
+
 		else
 		{
 			cout<<"命令错误，请从新输入："<<endl;
-			cout<<"******************"<<endl;
+			cout<<"***************************"<<endl;
 			cout<<"chmod mode (mode:room/p2p)"<<endl;
-			cout<<"******************"<<endl;
+			cout<<"***************************"<<endl;
 		}
 		//cout<<mode<<endl;
 		//cout<<"该功能还在实现中，请耐心等候！"<<endl;
 
+	}
+	else if(strcmp(cmd,"ls")==0)
+	{
+		showcmd();
 	}
 	else
 	{
