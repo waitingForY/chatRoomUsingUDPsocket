@@ -216,8 +216,10 @@ void parse_cmd(char *cmdline,int sock,struct sockaddr_in *servaddr)
 	}
 }
 
-
-
+/*
+ *
+ *有用户登录时，执行do_someone_login()
+ */
 void do_someone_login(MESSAGE &msg)
 {
 	USER_INFO *user=(USER_INFO*)msg.body;
@@ -227,7 +229,11 @@ void do_someone_login(MESSAGE &msg)
 	client_list.push_back(*user);
 }
 
-
+/*
+ *
+ *有用户退出的时候，执行do_someone_logoout()
+ *
+ */
 void do_someone_logout(MESSAGE &msg)
 {
 	USER_LIST::iterator it;
@@ -241,6 +247,11 @@ void do_someone_logout(MESSAGE &msg)
 	cout<<msg.body<<" 退出了聊天室！"<<endl;
 }
 
+
+/*
+ *
+ *发送list命令的时候，向服务器发送消息以获取用户列表do_getlist()
+ */
 void do_getlist(int sock)
 {
 	int count;
@@ -329,6 +340,15 @@ bool sendmsgto(int sock,char *name,char *msg)
 	sendto(sock,(const char *)&m,sizeof(m),0,(struct sockaddr *)&peeraddr,sizeof(peeraddr));
 	return true;
 }
+
+
+
+
+/*
+ *
+ *客户端主程序
+ *
+ */
 void chat_cli(int sock)
 {
 	struct sockaddr_in servaddr;
