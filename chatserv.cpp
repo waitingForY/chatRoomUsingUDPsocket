@@ -43,7 +43,11 @@ void do_send_msg_to_all(MESSAGE msg,int sock)
 }
 
 
-
+/*
+ *
+ *服务器端的主程序
+ *
+ */
 void chat_srv(int sock)
 {
 	struct sockaddr_in cliaddr;
@@ -84,7 +88,10 @@ void chat_srv(int sock)
 }
 
 
-//登录函数
+/*
+ *如果有用户登录
+ *
+ */
 void do_login(MESSAGE msg,int sock,struct sockaddr_in *cliaddr)
 {
 	
@@ -145,7 +152,11 @@ void do_login(MESSAGE msg,int sock,struct sockaddr_in *cliaddr)
 	}
 }
 
-//有用户推出
+/*
+ *
+ *如果有用户退出
+ *
+ */
 void do_logout(MESSAGE msg,int sock,struct sockaddr_in *cliaddr)
 {
 	cout<<"has a user logout:"<<msg.body<<"<->"<<inet_ntoa(cliaddr->sin_addr)<<":"<<ntohs(cliaddr->sin_port)<<endl;
@@ -173,7 +184,11 @@ void do_logout(MESSAGE msg,int sock,struct sockaddr_in *cliaddr)
 }
 
 
-//查询用户列表
+/*
+ *
+ *服务器执行查询列表工作，并返回结果
+ *
+ */
 void do_sendlist(int sock,struct sockaddr_in *cliaddr)
 {
 	MESSAGE msg;
