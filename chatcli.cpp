@@ -43,7 +43,8 @@ void showcmd()
 	cout<<"4、list"<<endl;
 	cout<<"5、clear"<<endl;
 	cout<<"6、showinfo"<<endl;
-	cout<<"7、chmod mode(mode:room/p2p)"<<endl;
+	cout<<"7、send username msg"<<endl;
+	cout<<"8、send all msg"<<endl;
 	cout<<"*****************************"<<endl;
 	cout<<endl;
 }
@@ -61,8 +62,6 @@ void show_help_info()
 	cout<<"6、showinfo查看个人信息！"<<endl;
 	cout<<"7、send username msg 向username发送msg，username必须存在（不能是自己）"<<endl;
 	cout<<"8、send all msg 向所有人发送msg（all为关键字，用户名不能为all）"<<endl;
-	cout<<"9、chmod mode选择聊天模式,mode为聊天模式（提供公聊room和私聊两种模式p2p）！"<<endl;
-
 }
 /*
  *私聊函数
@@ -92,7 +91,7 @@ void parse_cmd(char *cmdline,int sock,struct sockaddr_in *servaddr)
 	  *p='\0';
 	strcpy(cmd,cmdline);
 	
-	if(strcmp(cmd,"exit")==0)
+	if(strcmp(cmd,"exit")==0||strcmp(cmd,"3")==0)
 	{
 		MESSAGE msg;
 		memset(&msg,0,sizeof(msg));
@@ -102,6 +101,22 @@ void parse_cmd(char *cmdline,int sock,struct sockaddr_in *servaddr)
 		  ERROR_EXIT("sendto");
 		cout<<"你已经成功退出聊天室！"<<endl;
 		exit(EXIT_SUCCESS);
+	}
+	else if(strcmp(cmd,"7")==0)
+	{
+		system("clear");
+		cout<<"using follow command:"<<endl;
+		cout<<"**********************"<<endl;
+		cout<<"send username msg"<<endl;
+		cout<<"***********************"<<endl;
+	}
+	else if(strcmp(cmd,"8")==0)
+	{
+		system("clear");
+		cout<<"using follow command:"<<endl;
+		cout<<"**********************"<<endl;
+		cout<<"send all msg"<<endl;
+		cout<<"***********************"<<endl;
 	}
 	else if(strcmp(cmd,"send")==0)
 	{
@@ -133,7 +148,7 @@ void parse_cmd(char *cmdline,int sock,struct sockaddr_in *servaddr)
 			  cout<<"send false!"<<endl;
 		}
 	}
-	else if(strcmp(cmd,"list")==0)
+	else if(strcmp(cmd,"list")==0||strcmp(cmd,"4")==0)
 	{
 		MESSAGE msg;
 		memset(&msg,0,sizeof(msg));
@@ -141,7 +156,7 @@ void parse_cmd(char *cmdline,int sock,struct sockaddr_in *servaddr)
 		if(sendto(sock,&msg,sizeof(msg),0,(struct sockaddr *)servaddr,sizeof(*servaddr))<0)
 		  ERROR_EXIT("sendto");	
 	}
-	else if(strcmp(cmd,"showinfo")==0)
+	else if(strcmp(cmd,"showinfo")==0||strcmp(cmd,"6")==0)
 	{
 		for(USER_LIST::iterator it=client_list.begin();it!=client_list.end();++it)
 		  if(strcmp(it->username,username)==0)
@@ -152,60 +167,17 @@ void parse_cmd(char *cmdline,int sock,struct sockaddr_in *servaddr)
 
 		  }
 	}
-	else if(strcmp(cmd,"man")==0)
+	else if(strcmp(cmd,"man")==0||strcmp(cmd,"2")==0)
 	{
 		cout<<"有如下命令可以使用："<<endl;
 		show_help_info();
 	}
-	else if(strcmp(cmd,"clear")==0)
+	else if(strcmp(cmd,"clear")==0||strcmp(cmd,"5")==0)
 	{
 		system("clear");
 		//cout<<"该功能还在实现中，请耐心等候！"<<endl;
 	}
-	else if(strcmp(cmd,"chmod")==0)
-	{
-		char mode[16]={0};
-		while(*(++p)==' ');
-		char *p2;
-		p2=p;
-		//p2=strchr(p,' ');
-		if(p2==NULL)
-		{
-			cout<<"命令错误，请从新输入："<<endl;
-			showcmd();
-		}
-		//*p2='\0';
-		strcpy(mode,p2);
-		if(strcmp(mode,"room")==0)
-		{
-			system("clear");
-			cout<<"现在你可以进行群聊了！"<<endl;
-			cout<<"******************"<<endl;
-			cout<<"send all msg"<<endl;
-			cout<<"******************"<<endl;
-
-		}
-		else if(strcmp(mode,"p2p")==0)
-		{
-			system("clear");
-			cout<<"现在你可以进行点对点通信了！"<<endl;
-			cout<<"******************"<<endl;
-			cout<<"send username msg"<<endl;
-			cout<<"******************"<<endl;
-		}
-
-		else
-		{
-			cout<<"命令错误，请从新输入："<<endl;
-			cout<<"***************************"<<endl;
-			cout<<"chmod mode (mode:room/p2p)"<<endl;
-			cout<<"***************************"<<endl;
-		}
-		//cout<<mode<<endl;
-		//cout<<"该功能还在实现中，请耐心等候！"<<endl;
-
-	}
-	else if(strcmp(cmd,"ls")==0)
+	else if(strcmp(cmd,"ls")==0||strcmp(cmd,"1")==0)
 	{
 		showcmd();
 	}
